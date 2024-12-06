@@ -1,102 +1,103 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: yant <yant@student.42.fr>                  +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/12/06 15:25:42 by yant              #+#    #+#             */
+/*   Updated: 2024/12/06 18:25:29 by yant             ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include <unistd.h>
+#include <stdlib.h>
 #include "get_next_line.h"
+#include <stdio.h>
 
 
-static int fazlası(char **fazla)
+char *last_part(char *extra)
 {
-   char	*newline_ptr;
+    int i;
+    int j;
+    char *tmp;
 
-	newline_ptr = ft_strchar(*fazla ,'\n');
-	if (newline_ptr && newline_ptr[1] != '\0')
-	{
-		*fazla = ft_strdup(newline_ptr + 1);
-		if (!(*fazla))
-            return (1);
-	}
-	else
-		*fazla = NULL;
-	return (0);
-}
-static char *get_line(char *artik_line)
-{
-	int		i;
-	char	*line;
-
-	i = 0;
-	while (artik_line[i] && artik_line[i] != '\n')
-		i++;
-	if (artik_line[i] == '\n')
-		i++;
-	line = malloc(i + 1);
-	if (!line)
-		return (NULL);
-	ft_memcpy(line, artik_line, i);
-	line[i] = 0;
-	return (line);
+    i = 0;
+    j = 0;
+    while (extra[i] != '\n' && extra[i] != '\0')
+        i++;
+    
+    tmp = malloc(ft_strlen(extra) - i);
+    if(extra[i] == '\n')
+        i++;
+    while (extra[i + j] != '\0')
+    {
+        tmp[j] = extra[i + j];
+        j++;
+    }
+    tmp[j] = '\0';
+    return(tmp);    
+    
 }
 
-static char *read_myfd(int fd, char *artik)
+char *first_line(char *extra)
+{
+    int i;
+    char *line;
+
+    i = 0;
+    while((extra[i] != '\n') && (extra[i] != '\0'))
+        i++;
+    line = malloc(i + 2);
+    if(!line)
+        return(free(extra),NULL);
+    i=0;
+    while (extra[i] != '\n' && extra[i] != '\0')
+    {
+        line[i] = extra[i];
+        i++;
+    }
+    if(extra[i] == '\n')
+    {
+        line[i] = '\n';
+        i++;
+    }
+    line[i] = '\0';
+    return(line);   
+}
+
+char *read_myfd(int fd,char *extra)
 {
     char buffer[BUFFER_SIZE + 1];
-    int readed_fd = BUFFER_SIZE;
+    int readed;
     char    *tmp;
 
-    while (!ft_strchar(artik,'\n') && readed_fd != 0)
+    readed = 1;
+    while (readed != 0 && !ft_strchr(extra))
     {
-        readed_fd = read(fd, buffer, BUFFER_SIZE);
-        if (readed_fd == 0)
-            break;
-        if (readed_fd == -1)
-        {
-            free(artik);
-            return (NULL);
-        }
-
-        buffer[readed_fd] = '\0';
-        tmp = artik;
-        artik = ft_strjoin(artik, buffer);
+        readed = read(fd, buffer, BUFFER_SIZE);
+        if(readed == -1)
+            return(NULL);
+        buffer[readed] = '\0';
+        tmp = extra;
+        extra = ft_strjoin(extra,buffer);
         free(tmp);
     }
-    return (artik);
+    return(extra);
 }
 
 char *get_next_line(int fd)
 {
-    static char *artik = NULL;
-    char    *line;
-    char    *tmp;
-
-    if (fd < 0 || BUFFER_SIZE <= 0)
-        return (NULL);
-
-    artik = read_myfd(fd, artik);
-    if (!artik)
-        return (NULL); 
-
-    line = get_line(artik);
-    if (!line)
-	{
-		free(artik);
-		artik = NULL;
-		return (NULL);
-	}
-    tmp = artik;
-	if (fazlası(&artik))
-	{
-		free(line);
-        line = NULL;
-	}
-	free(tmp);
-	return (line);
-}
-
-int main()
-{
-    int fd = open("text.txt", O_RDONLY);
+    static char *extra;
     char *line;
-    line = get_next_line(fd);
-    printf("Satır: %s\n", line);
-    free(line);
 
-    close(fd);
-    return 0;
+    if(fd < 0 || BUFFER_SIZE <= 0)
+        return(NULL);
+    extra = read_myfd(fd,extra);
+    //printf("%s\n", extra);
+    line = first_line(extra);
+    //printf("%s\n", line);
+    extra = last_part(extra);
+    //printf("%s", extra);
+    return(line);
 }
