@@ -1,18 +1,16 @@
-#include "get_next_line.h"
 #include <fcntl.h>
 #include <stdio.h>
-#include <stdlib.h>
-
 int main()
 {
-    int fd = open("dosya.txt", O_RDONLY);
-    char *str;
-    char *str2;
-
-    str = get_next_line(fd);
-    printf("%s", str);
-        free(str);
-     str2 = get_next_line(fd);
-    printf("%s", str);
-    free(str2);
+    //int fd = open("text.txt", O_RDONLY);
+    int fd = open("text.txt", O_RDONLY, 0777);
+    printf("%d\n",fd);
+    int fd1 = open("text3.txt",O_RDONLY, 0777);
+printf("%d\n",fd1);
+int fd4 = open("text4.txt", O_RDONLY, 0777);
+    printf("%d\n",fd4);
+int fd5 = open("text4.txt", O_RDONLY, 0777);
+    printf("%d\n",fd5);
+    int fd6 = open("text4.txt", O_RDONLY, 0777);
+    printf("%d\n",fd6);
 }
